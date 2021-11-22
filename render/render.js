@@ -1,12 +1,19 @@
-
 //API
+let people;
 let data =[];
 axios.get("https://raw.githubusercontent.com/hexschool/js-training/main/travelApi.json")
   .then(function(re){
   // console.log(re.data.data)
   data = re.data.data;
-  card(data)
+  card(data);
+  
 })
+
+// axios.get('https://raw.githubusercontent.com/hexschool/js-training/main/travelAPI-lv1.json')
+//   .then(function(re){
+        
+//         })
+
 //渲染套票圖卡
 function card(data){
 let totalSearch = document.querySelector("#searchResult-text")
@@ -43,6 +50,15 @@ data.forEach(i=>content+=` <li class="ticketCard">
 
 cardArea.innerHTML = content
 totalSearch.textContent = `本次搜尋共 ${data.length} 筆資料`
+// console.log(data)
+people = data
+filterData();
+// console.log(totalObj);
+arrayData();
+// console.log(newData);
+createChart();
+totalObj = {};
+newData = [];
 }
 
 //篩選地區
@@ -50,8 +66,8 @@ let searchArea = document.querySelector(".regionSearch")
 searchArea.addEventListener("change",filter)
 function filter(e){
   // console.log(e.target.value)
-  let a = data.filter(i=>i.area==e.target.value);
-  card(a);
+  let filterArea = data.filter(i=>i.area==e.target.value);
+  card(filterArea);
   if(e.target.value==""){
     return card(data)
   }
@@ -130,6 +146,53 @@ function addData(){
     alert("超過字數")
   }
   }
+}
+
+
+//圓環圖 chart
+// 篩選地區，並累加數字上去
+// totalObj 會變成 {高雄: 2, 台北: 1, 台中: 2}
+
+let totalObj = {};
+function filterData(){
+  people.forEach(function(item,index){
+  if(totalObj[item.area]==undefined){
+    totalObj[item.area] = 1;
+  }else{
+     totalObj[item.area] +=1;
+  }
+})
+}
+
+
+// newData = [["高雄", 2], ["台北",1], ["台中", 1]]
+
+let newData = [];
+function arrayData(){
+  let area = Object.keys(totalObj);
+// area output ["高雄","台北","台中"]
+
+area.forEach(function(item,index){
+  let ary = [];
+  ary.push(item);
+  ary.push(totalObj[item]);
+  newData.push(ary);
+})
+}
+
+// 將 newData 丟入 c3 產生器
+
+function createChart(){
+  const chart = c3.generate({
+  bindto: "#chart",
+  data: {
+    columns: newData,
+    type : 'donut',
+  },
+  donut: {
+    title: "地區"
+  }
+});
 }
 
 // card(data)//渲染套票圖卡
